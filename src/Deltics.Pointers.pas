@@ -103,7 +103,7 @@ implementation
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   function HexToBin(const aString: String;
-                    var aSize: Integer): Pointer;
+                    var   aSize: Integer): Pointer;
   begin
     result  := NIL;
     aSize   := Length(aString) div 2;
@@ -111,14 +111,15 @@ implementation
     if aSize = 0 then
       EXIT;
 
-    result := AllocMem(aSize);
+    GetMem(result, aSize);
+
     HexToBin(aString, result^, aSize);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure HexToBin(const aString: String;
-                     var aBuf;
+                     var   aBuf;
                      const aSize: Integer);
   begin
     if aSize = 0 then
