@@ -1,5 +1,5 @@
 
-{$i test.inc}
+{$i deltics.inc}
 
   unit PointerSizeTests;
 
