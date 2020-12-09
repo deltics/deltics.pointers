@@ -15,8 +15,7 @@
   "source":{
       "files":[
         "src\\deltics.pointers.inc",
-        "src\\Deltics.Pointers.pas",
-        "src\\Deltics.ReverseBytes.pas"
+        "src\\Deltics.Pointers.pas"
       ]
     }
 }
