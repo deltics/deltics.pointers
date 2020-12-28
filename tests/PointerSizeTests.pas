@@ -20,7 +20,8 @@ interface
 implementation
 
   uses
-    Deltics.Pointers;
+    Deltics.Pointers,
+    Deltics.Smoketest.Test;
 
 
   const
