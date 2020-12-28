@@ -4,7 +4,7 @@
 {$debuginfo OFF}
 
 {$ifdef debug_DelticsPointers}
-  {$undefine InlineMethods}
+  {$undef InlineMethods}
   {$debuginfo ON}
 {$endif}
 
