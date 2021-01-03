@@ -10,12 +10,14 @@
   "language":"en",
   "content":"source",
   "dependencies":[
-    "deltics.inc:1.0.4"
+    "deltics.inc:1.1.0"
   ],
   "source":{
       "files":[
         "src\\deltics.pointers.inc",
-        "src\\Deltics.Pointers.pas"
+        "src\\Deltics.Pointers.pas",
+        "src\\Deltics.Pointers.Memory.pas",
+        "src\\Deltics.Pointers.Types.pas"
       ]
     }
 }
