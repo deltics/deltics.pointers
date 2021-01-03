@@ -16,17 +16,12 @@ interface
       class procedure Alloc(var aPointer: Pointer; const aNumBytes: Integer); {$ifdef InlineMethods} inline; {$endif}
       class procedure AllocCopy(var aPointer: Pointer; const aNumBytes: Integer; const aSource: Pointer); //{$ifdef InlineMethods} inline; {$endif}
       class procedure AllocZeroed(var aPointer: Pointer; const aNumBytes: Integer); {$ifdef InlineMethods} inline; {$endif}
-      class procedure Copy(const aSource: Pointer; const aDest: Pointer; aNumBytes: Integer); overload;
-      class procedure Copy(const aSourceValue; var aDestValue; aNumBytes: Integer); overload;
+      class procedure Copy(const aSource: Pointer; const aDest: Pointer; aNumBytes: Integer);
       class procedure Free(var aPointer: Pointer); overload; {$ifdef InlineMethods} inline; {$endif}
       class procedure Free(aPointers: PPointerArray); overload;
-      class procedure Randomize(var aValue; const aNumBytes: Integer); overload;
-      class procedure Randomize(var aValue; const aNumBytes: Integer; const aMin: Byte); overload;
-      class procedure Randomize(var aValue; const aNumBytes: Integer; const aMin, aMax: Byte); overload;
       class procedure Randomize(const aDest: Pointer; const aNumBytes: Integer); overload;
       class procedure Randomize(const aDest: Pointer; const aNumBytes: Integer; const aMin: Byte); overload;
       class procedure Randomize(const aDest: Pointer; const aNumBytes: Integer; const aMin, aMax: Byte); overload;
-      class procedure Zeroize(var aValue; const aNumBytes: Integer); overload; {$ifdef InlineMethods} inline; {$endif}
       class procedure Zeroize(const aDest: Pointer; const aNumBytes: Integer); overload; {$ifdef InlineMethods} inline; {$endif}
     end;
 
@@ -94,7 +89,7 @@ implementation
                                    const aSource: Pointer);
   begin
     GetMem(aPointer, aNumBytes);
-    Copy(aSource, aPointer, aNumBytes);
+    CopyBytes(aSource^, aPointer^, aNumBytes);
   end;
 
 
@@ -108,12 +103,6 @@ implementation
   class procedure Memory.Copy(const aSource: Pointer; const aDest: Pointer; aNumBytes: Integer);
   begin
     CopyBytes(aSource^, aDest^, aNumBytes);
-  end;
-
-
-  class procedure Memory.Copy(const aSourceValue; var aDestValue; aNumBytes: Integer);
-  begin
-    CopyBytes(aSourceValue, aDestValue, aNumBytes);
   end;
 
 
@@ -161,35 +150,17 @@ implementation
 
   class procedure Memory.Randomize(const aDest: Pointer; const aNumBytes: Integer; const aMin: Byte);
   begin
-    Randomize(aDest^, aNumBytes, aMin, 255);
+    Randomize(aDest, aNumBytes, aMin, 255);
   end;
 
 
   class procedure Memory.Randomize(const aDest: Pointer; const aNumBytes: Integer; const aMin, aMax: Byte);
-  begin
-    Randomize(aDest^, aNumBytes, aMin, aMax);
-  end;
-
-
-  class procedure Memory.Randomize(var aValue; const aNumBytes: Integer);
-  begin
-    Randomize(@aValue, aNumBytes);
-  end;
-
-
-  class procedure Memory.Randomize(var aValue; const aNumBytes: Integer; const aMin: Byte);
-  begin
-    Randomize(aValue, aNumBytes, aMin, 255);
-  end;
-
-
-  class procedure Memory.Randomize(var aValue; const aNumBytes: Integer; const aMin, aMax: Byte);
   var
     i: Integer;
     range: Integer;
     bytePtr: PByte;
   begin
-    bytePtr := @aValue;
+    bytePtr := aDest;
     range   := aMax - aMin + 1;
 
     for i := 1 to aNumBytes do
@@ -203,12 +174,6 @@ implementation
   class procedure Memory.Zeroize(const aDest: Pointer; const aNumBytes: Integer);
   begin
     FillChar(aDest^, aNumBytes, 0);
-  end;
-
-
-  class procedure Memory.Zeroize(var aValue; const aNumBytes: Integer);
-  begin
-    FillChar(aValue, aNumBytes, 0);
   end;
 
 

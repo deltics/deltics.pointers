@@ -12,8 +12,7 @@ interface
 
   type
     MemoryRandomize = class(TTest)
-      procedure RandomizesSpecifiedNumberOfBytesUsingPointers;
-      procedure RandomizesSpecifiedNumberOfBytesUsingUntypedArgs;
+      procedure RandomizesSpecifiedNumberOfBytes;
       procedure RandomizesSpecifiedNumberOfBytesNotLongWordAligned;
       procedure LimitsRandomizedBytesToSpecifiedRange;
     end;
@@ -28,7 +27,7 @@ implementation
 
 { Randomize }
 
-  procedure MemoryRandomize.RandomizesSpecifiedNumberOfBytesUsingPointers;
+  procedure MemoryRandomize.RandomizesSpecifiedNumberOfBytes;
   const
     BUFSIZE = 1024;
   var
@@ -56,44 +55,17 @@ implementation
 
 
 
-  procedure MemoryRandomize.RandomizesSpecifiedNumberOfBytesUsingUntypedArgs;
-  const
-    BUFSIZE = 1024;
-  var
-    org: Pointer;
-    cpy: Pointer;
-  begin
-    GetMem(org, BUFSIZE);
-    GetMem(cpy, BUFSIZE);
-    try
-      CopyMemory(cpy, org, BUFSIZE);
-
-      Test('org').Assert(org).IsNotNIL;
-      Test('cpy').Assert(cpy).IsNotNIL;
-      Test('cpy == org').Assert(cpy).EqualsBytes(org, BUFSIZE);
-
-      Memory.Randomize(cpy^, BUFSIZE);
-
-      Test('cpy <> org').Assert(cpy).HasUnequalBytes(org, BUFSIZE);
-
-    finally
-      FreeMem(cpy);
-      FreeMem(org);
-    end;
-  end;
-
-
   procedure MemoryRandomize.LimitsRandomizedBytesToSpecifiedRange;
   var
     s: AnsiString;
   begin
     SetLength(s, 1024);
-    Memory.Randomize(s[1], Length(s), 65, 66);
+    Memory.Randomize(@s[1], Length(s), 65, 66);
 
     Test('s').Assert(s).Contains('A');
     Test('s').Assert(s).Contains('B');
 
-    Memory.Randomize(s[1], Length(s), 65, 65);
+    Memory.Randomize(@s[1], Length(s), 65, 65);
 
     Test('s').Assert(s).Contains('A');
     Test('s').Assert(s).DoesNotContain('B');
