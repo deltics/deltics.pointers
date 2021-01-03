@@ -1,7 +1,7 @@
 
 {$i deltics.inc}
 
-  unit PointerSizeTests;
+  unit Test.PointerSize;
 
 
 interface
@@ -11,7 +11,7 @@ interface
 
 
   type
-    TPointerSizeTests = class(TTest)
+    PointerSize = class(TTest)
       procedure NativeUIntIsTheExpectedSizeForPlatform;
       procedure IntPointerIsTheExpectedSizeForPlatform;
     end;
@@ -36,13 +36,13 @@ implementation
 
 { TPointerSizeTests }
 
-  procedure TPointerSizeTests.IntPointerIsTheExpectedSizeForPlatform;
+  procedure PointerSize.IntPointerIsTheExpectedSizeForPlatform;
   begin
     Test('sizeof(IntPointer)').Assert(sizeof(IntPointer)).Equals(POINTER_SIZE);
   end;
 
 
-  procedure TPointerSizeTests.NativeUIntIsTheExpectedSizeForPlatform;
+  procedure PointerSize.NativeUIntIsTheExpectedSizeForPlatform;
   begin
     Test('sizeof(NativeUInt)').Assert(sizeof(NativeUInt)).Equals(POINTER_SIZE);
   end;

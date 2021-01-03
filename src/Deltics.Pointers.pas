@@ -43,34 +43,53 @@
 
 interface
 
-  type
-  {$ifdef __DELPHIXE}
-    {$ifdef WIN32}
-      NativeUInt  = Cardinal;
-      NativeInt   = Integer;
-    {$else}
-      NativeUInt  = UInt64;
-      NativeInt   = Int64;
-    {$endif}
-  {$endif}
+  uses
+    Deltics.Pointers.Memory,
+    Deltics.Pointers.Types;
 
-    IntPointer  = NativeUInt;
-    PObject     = ^TObject;
-    PUnknown    = ^IUnknown;
+
+  type
+    NativeUInt    = Deltics.Pointers.Types.NativeUInt;
+    NativeInt     = Deltics.Pointers.Types.NativeInt;
+
+    IntPointer    = Deltics.Pointers.Types.IntPointer;
+    PObject       = Deltics.Pointers.Types.PObject;
+    PUnknown      = Deltics.Pointers.Types.PUnknown;
+
+    TPointerArray = Deltics.Pointers.Types.TPointerArray;
+    PPointer      = Deltics.Pointers.Types.PPointer;
+    PPointerArray = Deltics.Pointers.Types.PPointerArray;
+
+
+    Memory  = Deltics.Pointers.Memory.Memory;
+
 
 
   function BinToHex(const aBuf: Pointer; const aSize: Integer): String;
   function HexToBin(const aString: String; var aSize: Integer): Pointer; overload;
   procedure HexToBin(const aString: String; var aBuf; const aSize: Integer); overload;
-  procedure FillZero(var aDest; const aSize: Integer); overload;
 
-  function ByteOffset(const aPointer: Pointer; const aOffset: Integer): PByte;
+  procedure FillZero(var aDest; const aSize: Integer); overload; deprecated;
+
+  function ByteOffset(const aPointer: Pointer; const aOffset: Integer): PByte; deprecated;
+
+  procedure CopyBytes(const aSource; var aDest; aCount: Integer); overload; deprecated;
+  procedure CopyBytes(const aSource; var aDest; aDestOffset: Integer; aCount: Integer); overload; deprecated;
+  procedure CopyBytes(const aSource: Pointer; const aDest: Pointer; aCount: Integer); overload; deprecated;
+
 
 
 implementation
 
   uses
-    Classes;
+    Classes
+    {$ifdef 64BIT}
+      {$ifdef MSWINDOWS},
+        Windows
+      {$else}
+        {$message fatal '64-bit platform not supported'}
+      {$endif}
+    {$endif};
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
@@ -136,5 +155,68 @@ implementation
   end;
 
 
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  procedure CopyBytes(const aSource; var aDest; aCount: Integer);
+{$ifdef 64BIT}
+  begin
+    CopyMemory(@aDest, @aSource, aCount);
+  end;
+{$else}
+  asm
+                      // ECX = Count
+                      // EAX = Const Source
+                      // EDX = Var Dest
+                      // If there are no bytes to copy, just quit
+                      // altogether; there's no point pushing registers.
+    Cmp   ECX,0
+    Je    @JustQuit
+                      // Preserve the critical Delphi registers.
+    push  ESI
+    push  EDI
+                      // Move Source into ESI (SOURCE register).
+                      // Move Dest into EDI (DEST register).
+                      // This might not actually be necessary, as I'm not using MOVsb etc.
+                      // I might be able to just use EAX and EDX;
+                      // there could be a penalty for not using ESI, EDI, but I doubt it.
+                      // This is another thing worth trying!
+    Mov   ESI, EAX
+    Mov   EDI, EDX
+                      // The following loop is the same as repNZ MovSB, but oddly quicker!
+  @Loop:
+    Mov   AL, [ESI]   // get a source byte
+    Inc   ESI         // bump source address
+    Mov   [EDI], AL   // Put it into the destination
+    Inc   EDI         // bump destination address
+    Dec   ECX         // Dec ECX to note how many we have left to copy
+    Jnz   @Loop       // If ECX <> 0, then loop.
+                      // Pop the critical Delphi registers that we've altered.
+    pop   EDI
+    pop   ESI
+  @JustQuit:
+  end;
+{$endif}
 
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  procedure CopyBytes(const aSource; var aDest; aDestOffset: Integer; aCount: Integer);
+  var
+    destBytes: PByte;
+  begin
+    destBytes := PByte(Int64(@aDest) + aDestOffset);
+    CopyBytes(aSource, destBytes^, aCount);
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  procedure CopyBytes(const aSource: Pointer; const aDest: Pointer; aCount: Integer);
+  begin
+    CopyBytes(aSource^, aDest^, aCount);
+  end;
+
+
+
+
+
+
 end.
+
