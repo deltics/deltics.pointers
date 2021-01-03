@@ -82,7 +82,14 @@ interface
 implementation
 
   uses
-    Classes;
+    Classes
+    {$ifdef 64BIT}
+      {$ifdef MSWINDOWS},
+        Windows
+      {$else}
+        {$message fatal '64-bit platform not supported'}
+      {$endif}
+    {$endif};
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
@@ -150,7 +157,7 @@ implementation
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure CopyBytes(const aSource; var aDest; aCount: Integer);
-{$ifdef WIN64}
+{$ifdef 64BIT}
   begin
     CopyMemory(@aDest, @aSource, aCount);
   end;
