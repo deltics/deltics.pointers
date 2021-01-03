@@ -16,6 +16,7 @@ interface
       class procedure Alloc(var aPointer: Pointer; const aNumBytes: Integer); {$ifdef InlineMethods} inline; {$endif}
       class procedure AllocCopy(var aPointer: Pointer; const aNumBytes: Integer; const aSource: Pointer); //{$ifdef InlineMethods} inline; {$endif}
       class procedure AllocZeroed(var aPointer: Pointer; const aNumBytes: Integer); {$ifdef InlineMethods} inline; {$endif}
+      class function ByteOffset(const aPointer: Pointer; const aOffset: Integer): Pointer;
       class procedure Copy(const aSource: Pointer; const aDest: Pointer; aNumBytes: Integer);
       class procedure Free(var aPointer: Pointer); overload; {$ifdef InlineMethods} inline; {$endif}
       class procedure Free(aPointers: PPointerArray); overload;
@@ -83,14 +84,16 @@ implementation
 {$endif}
 
 
-{ Memory }
 
-  class procedure Memory.Alloc(var aPointer: Pointer; const aNumBytes: Integer);
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class procedure Memory.Alloc(var   aPointer: Pointer;
+                               const aNumBytes: Integer);
   begin
     GetMem(aPointer, aNumBytes);
   end;
 
 
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   class procedure Memory.AllocCopy(var   aPointer: Pointer;
                                    const aNumBytes: Integer;
                                    const aSource: Pointer);
@@ -100,19 +103,33 @@ implementation
   end;
 
 
-  class procedure Memory.AllocZeroed(var aPointer: Pointer; const aNumBytes: Integer);
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class procedure Memory.AllocZeroed(var   aPointer: Pointer;
+                                     const aNumBytes: Integer);
   begin
     GetMem(aPointer, aNumBytes);
     FillChar(aPointer^, aNumBytes, 0);
   end;
 
 
-  class procedure Memory.Copy(const aSource: Pointer; const aDest: Pointer; aNumBytes: Integer);
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class function Memory.ByteOffset(const aPointer: Pointer;
+                                   const aOffset: Integer): Pointer;
+  begin
+    result := Pointer(IntPointer(aPointer) + Cardinal(aOffset));
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class procedure Memory.Copy(const aSource: Pointer;
+                              const aDest: Pointer;
+                                    aNumBytes: Integer);
   begin
     CopyBytes(aSource^, aDest^, aNumBytes);
   end;
 
 
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   class procedure Memory.Free(var aPointer: Pointer);
   begin
     FreeMem(aPointer);
@@ -120,6 +137,7 @@ implementation
   end;
 
 
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   class procedure Memory.Free(aPointers: PPointerArray);
   var
     i: Integer;
@@ -132,7 +150,9 @@ implementation
   end;
 
 
-  class procedure Memory.Randomize(const aDest: Pointer; const aNumBytes: Integer);
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class procedure Memory.Randomize(const aDest: Pointer;
+                                   const aNumBytes: Integer);
   var
     i: Integer;
     intPtr: PInteger;
@@ -155,13 +175,19 @@ implementation
   end;
 
 
-  class procedure Memory.Randomize(const aDest: Pointer; const aNumBytes: Integer; const aMin: Byte);
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class procedure Memory.Randomize(const aDest: Pointer;
+                                   const aNumBytes: Integer;
+                                   const aMin: Byte);
   begin
     Randomize(aDest, aNumBytes, aMin, 255);
   end;
 
 
-  class procedure Memory.Randomize(const aDest: Pointer; const aNumBytes: Integer; const aMin, aMax: Byte);
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class procedure Memory.Randomize(const aDest: Pointer;
+                                   const aNumBytes: Integer;
+                                   const aMin, aMax: Byte);
   var
     i: Integer;
     range: Integer;
@@ -178,7 +204,9 @@ implementation
   end;
 
 
-  class procedure Memory.Zeroize(const aDest: Pointer; const aNumBytes: Integer);
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class procedure Memory.Zeroize(const aDest: Pointer;
+                                 const aNumBytes: Integer);
   begin
     FillChar(aDest^, aNumBytes, 0);
   end;
